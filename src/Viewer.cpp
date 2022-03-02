@@ -15,7 +15,7 @@ Viewer::Viewer(QWidget *parent) : QWidget(parent)
     resize(1200, 600);
     setWindowTitle("VMM Event Display");
 
-    InitAnalysis("./data/run_0331.root");
+    InitAnalysis("./data/run_0588.root");
 }
 
 void Viewer::InitGui()
@@ -39,7 +39,7 @@ void Viewer::InitGui()
 
     // file path indicator and func widget
     func_widget = new QWidget(this);
-    le_path = new QLineEdit("./data/run_0331.root", func_widget);
+    le_path = new QLineEdit("./data/run_0588.root", func_widget);
     btn_analyze = new QPushButton("&Analyze", func_widget);
     QHBoxLayout* _lhy = new QHBoxLayout(func_widget);
     _lhy -> addWidget(le_path);
