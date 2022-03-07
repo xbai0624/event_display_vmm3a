@@ -17,9 +17,14 @@ struct Cluster
     float max_timing_difference();
     float average_timing_difference();
 
-    std::vector<int> strips;
-    std::vector<int> charge;
-    std::vector<int> timing;
+    std::vector<int> strips; // ch No
+    std::vector<int> charge; // pdo
+    std::vector<int> timing; // tdo
+
+    std::vector<int> bcid;
+    std::vector<int> gray_code_bcid; // gray code decoded bcid
+    int daq_time_s;
+    int daq_time_ns;
 };
 
 std::ostream& operator<<(std::ostream &os, const Cluster &c);

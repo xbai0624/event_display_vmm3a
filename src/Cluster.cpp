@@ -5,6 +5,11 @@
 Cluster::Cluster()
 {
     strips.clear();
+    charge.clear();
+    timing.clear();
+
+    bcid.clear();
+    gray_code_bcid.clear();
 }
 
 Cluster::~Cluster()

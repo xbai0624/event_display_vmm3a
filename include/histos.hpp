@@ -1,3 +1,12 @@
+////////////////////////////////////////////////////////////////////////////////
+//  histogram manager                                                         //
+//  read a config file, build histograms as described in the config file      //
+//                                                                            //
+//  in order to make this file as independent as possible,                    //
+//  a txt parser was also implemented in this file                            //
+//  Xinzhan Bai                                                               //
+////////////////////////////////////////////////////////////////////////////////
+
 #ifndef HISTOS_HPP
 #define HISTOS_HPP
 
@@ -15,14 +24,6 @@
 #include <TH2F.h>
 #include <TObject.h>
 #include <TFile.h>
-
-////////////////////////////////////////////////////////////////////////////////
-//  histogram manager                                                         //
-//  read a config file, build histograms as described in the config file      //
-//                                                                            //
-//  in order to make this file as independent as possible,                    //
-//  a txt parser was also implemented in this file                            //
-////////////////////////////////////////////////////////////////////////////////
 
 namespace histos
 {

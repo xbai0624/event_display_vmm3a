@@ -109,28 +109,6 @@ void Analyzer::Analyze()
         for(int i=0; i<number_of_vmm_chips; i++) 
         {
             int fired_strips = vv_pdo->at(i).size();
-            //h_chip_occupancy -> Fill(fired_strips);
-            /*
-               TH1F *h = new TH1F(Form("h_evt_%d_chip_%d", entry, i),
-               Form("h_evt_%d_chip_%d", entry, i),
-               100, -20, 80);
-               h -> GetXaxis() -> SetTitle("VMM channel index");
-               h -> GetYaxis() -> SetTitle("peak [adc counts]");
-
-               TH1F *h_timing = new TH1F(Form("h_timing_evt_%d_chip_%d", entry, i),
-               Form("h_timing_evt_%d_chip_%d", entry, i),
-               100, -20, 80);
-               h_timing -> GetXaxis() -> SetTitle("VMM channel index");
-               h_timing -> GetYaxis() -> SetTitle("peak timing [adcc counts]");
-
-               for(int j=0; j<fired_strips; j++) {
-               h -> SetBinContent(vv_channelId->at(i).at(j) + 20, vv_pdo->at(i).at(j));
-               h_timing -> SetBinContent(vv_channelId->at(i).at(j) + 20, vv_tdo->at(i).at(j));
-               }
-
-               v_hits.push_back(h);
-               v_hits_timing.push_back(h_timing);
-               */
         }
 
         // analyze event
@@ -165,10 +143,17 @@ void Analyzer::FillEvent(std::vector<std::vector<int>> *m_pdo,
     auto &vmm_ch = m_chNo -> at(0);
 
     int strip_threshold = Config::instance()->get_config().at("strip offline threshold").val<int>();
- 
+
     // group cluster, first round, no cut
-    auto group_cluster = [&](const std::vector<int> &ch, const std::vector<int> &adc,
-            const std::vector<int> &time)
+    auto group_cluster = [&](
+            const std::vector<int> &ch,   // ch no 
+            const std::vector<int> &adc,  // pdo
+            const std::vector<int> &time, // tdo
+            const std::vector<int> &bcid, // bcid
+            const std::vector<int> &gray_bcid, // gray code decoded bcid
+            const int &daq_time_s, // daq time s
+            const int &daq_time_ns // daqtime ns
+            )
         -> std::vector<Cluster>
         {
             std::vector<Cluster> res;
@@ -176,6 +161,8 @@ void Analyzer::FillEvent(std::vector<std::vector<int>> *m_pdo,
             std::vector<int> charge_temp;
             std::vector<int> strip_temp;
             std::vector<int> time_temp;
+            std::vector<int> bcid_temp;
+            std::vector<int> gray_bcid_temp;
 
             for(size_t i=0; i<ch.size(); ++i)
             {
@@ -224,26 +211,6 @@ void Analyzer::FillEvent(std::vector<std::vector<int>> *m_pdo,
 
     // do clustering
     auto clusters = group_cluster(vmm_ch, vmm_pdo, vmm_tdo);
-    /*
-    // debug
-    for(auto &i: vmm_ch)
-    std::cout<<std::setfill(' ')<<std::setw(6)<<i;
-    std::cout<<std::endl<<std::endl;
-    for(auto &i: vmm_pdo)
-    std::cout<<std::setfill(' ')<<std::setw(6)<<i;
-    std::cout<<std::endl<<std::endl;
-
-    for(auto &i: vmm_tdo)
-    std::cout<<std::setfill(' ')<<std::setw(6)<<i;
-    std::cout<<std::endl<<std::endl;
-
-    std::cout<<"grouped custers:"<<std::endl; 
-    for(auto &i: clusters)
-    cout<<i;
-    std::cout<<std::endl<<std::endl;
-
-    getchar();
-    */
 
     // cluster size cut
     int cluster_min = Config::instance()->get_config().at("min cluster size").val<int>();
@@ -286,10 +253,14 @@ void Analyzer::FillEvent(std::vector<std::vector<int>> *m_pdo,
             histo_manager.histo_1d<float>(Form("hADCDistributionVMM0_Ch%d",c.strips[strip])) -> Fill(c.charge[strip]);
             // strip timing
             histo_manager.histo_1d<float>(Form("hTimingDistributionVMM0_Ch%d",c.strips[strip])) -> Fill(c.timing[strip]);
- 
+
             // strip adc and timing 2d
             histo_manager.histo_2d<float>("h2DADCVMM0") -> Fill(c.strips[strip], c.charge[strip]);
             histo_manager.histo_2d<float>("h2DTimingVMM0") -> Fill(c.strips[strip], c.timing[strip]);
+
+            // strip bcid
+            histo_manager.histo_1d<float>(Form("hBCIDVMM0_Ch%d", c.strips[strip])) -> Fill();
+            histo_manager.histo_1d<float>(Form("hGrayBCIDVMM0_Ch%d", c.strips[strip])) -> Fill();
         }
 
         //if(c.pos() >= 0. && c.pos() <= 25.)
