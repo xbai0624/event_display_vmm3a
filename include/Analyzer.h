@@ -25,7 +25,11 @@ class Analyzer : public RootTree
         // for analysis
         void FillEvent(std::vector<std::vector<int>> *vv_pdo, 
                 std::vector<std::vector<int>> *vv_tdo,
-                std::vector<std::vector<int>> *vv_chNo);
+                std::vector<std::vector<int>> *vv_chNo,
+                std::vector<std::vector<int>> *vv_bcid,
+                std::vector<std::vector<int>> *vv_gray_bcid,
+                std::vector<int> *v_daq_timestamp_s,
+                std::vector<int> *v_daq_timestamp_ns);
 
     private:
         //friend class RootTree;

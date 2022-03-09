@@ -76,7 +76,7 @@ void Analyzer::GetEvent(std::vector<TH1F*> &online_hits)
     online_event_id++;
 }
 
-// for analysis, hit process etc
+// for analysis, hit/cluster process etc
 void Analyzer::Analyze()
 {
     cout<<"total runs: "<<T_run -> GetEntries()<<endl;
@@ -112,7 +112,8 @@ void Analyzer::Analyze()
         }
 
         // analyze event
-        FillEvent(vv_pdo, vv_tdo, vv_channelId);
+        FillEvent(vv_pdo, vv_tdo, vv_channelId, vv_bcid, vv_grayDecoded,
+                v_daq_timestamp_s, v_daq_timestamp_ns);
     }
 
     // get end time
@@ -122,6 +123,7 @@ void Analyzer::Analyze()
     cout<<"Time elapsed: "<<elapsed_time.count() <<" seconds."<<endl;
 }
 
+// save results
 void Analyzer::Save()
 {
     std::string output = __parse_output_file_name();
@@ -132,7 +134,11 @@ void Analyzer::Save()
 
 void Analyzer::FillEvent(std::vector<std::vector<int>> *m_pdo,
         std::vector<std::vector<int>> *m_tdo,
-        std::vector<std::vector<int>> *m_chNo)
+        std::vector<std::vector<int>> *m_chNo,
+        std::vector<std::vector<int>> *m_bcid,
+        std::vector<std::vector<int>> *m_gray_bcid,
+        std::vector<int> *v_daq_timestamp_s,
+        std::vector<int> *v_daq_timestamp_ns)
 {
     assert(m_pdo->size() == m_tdo->size());
     assert(m_pdo->size() == 1);
@@ -141,6 +147,10 @@ void Analyzer::FillEvent(std::vector<std::vector<int>> *m_pdo,
     auto &vmm_pdo = m_pdo -> at(0);
     auto &vmm_tdo = m_tdo -> at(0);
     auto &vmm_ch = m_chNo -> at(0);
+    auto &vmm_bcid = m_bcid -> at(0);
+    auto &vmm_gray_bcid = m_gray_bcid -> at(0);
+    int daqTimeStamp_s = v_daq_timestamp_s -> at(0);
+    int daqTimeStamp_ns = v_daq_timestamp_ns -> at(0);
 
     int strip_threshold = Config::instance()->get_config().at("strip offline threshold").val<int>();
 
@@ -176,26 +186,39 @@ void Analyzer::FillEvent(std::vector<std::vector<int>> *m_pdo,
                         strip_temp.push_back(ch[i]);
                         charge_temp.push_back(adc[i]);
                         time_temp.push_back(time[i]);
+                        bcid_temp.push_back(bcid[i]);
+                        gray_bcid_temp.push_back(gray_bcid[i]);
                     }
                     else {
                         Cluster c;
                         c.strips = strip_temp;
                         c.charge = charge_temp;
                         c.timing = time_temp;
+                        c.bcid = bcid_temp;
+                        c.gray_code_bcid = gray_bcid_temp;
+                        c.daq_time_s = daq_time_s;
+                        c.daq_time_ns = daq_time_ns;
                         res.push_back(c);
 
                         charge_temp.clear();
                         strip_temp.clear();
                         time_temp.clear();
+                        bcid_temp.clear();
+                        gray_bcid_temp.clear();
+
                         strip_temp.push_back(ch[i]);
                         charge_temp.push_back(adc[i]);
                         time_temp.push_back(time[i]);
+                        bcid_temp.push_back(bcid[i]);
+                        gray_bcid_temp.push_back(gray_bcid[i]);
                     }
                 }
                 else {
                     strip_temp.push_back(ch[i]);
                     charge_temp.push_back(adc[i]);
                     time_temp.push_back(time[i]);
+                    bcid_temp.push_back(bcid[i]);
+                    gray_bcid_temp.push_back(gray_bcid[i]);
                 }
             }
 
@@ -204,13 +227,17 @@ void Analyzer::FillEvent(std::vector<std::vector<int>> *m_pdo,
                 c.strips = strip_temp;
                 c.charge = charge_temp;
                 c.timing = time_temp;
+                c.bcid = bcid_temp;
+                c.gray_code_bcid = gray_bcid_temp;
+                c.daq_time_s = daq_time_s;
+                c.daq_time_ns = daq_time_ns;
                 res.push_back(c);
             }
             return res;
         };
 
     // do clustering
-    auto clusters = group_cluster(vmm_ch, vmm_pdo, vmm_tdo);
+    auto clusters = group_cluster(vmm_ch, vmm_pdo, vmm_tdo, vmm_bcid, vmm_gray_bcid, daqTimeStamp_s, daqTimeStamp_ns);
 
     // cluster size cut
     int cluster_min = Config::instance()->get_config().at("min cluster size").val<int>();
@@ -259,8 +286,8 @@ void Analyzer::FillEvent(std::vector<std::vector<int>> *m_pdo,
             histo_manager.histo_2d<float>("h2DTimingVMM0") -> Fill(c.strips[strip], c.timing[strip]);
 
             // strip bcid
-            histo_manager.histo_1d<float>(Form("hBCIDVMM0_Ch%d", c.strips[strip])) -> Fill();
-            histo_manager.histo_1d<float>(Form("hGrayBCIDVMM0_Ch%d", c.strips[strip])) -> Fill();
+            histo_manager.histo_1d<float>(Form("hBCIDVMM0_Ch%d", c.strips[strip])) -> Fill(c.bcid[strip]);
+            histo_manager.histo_1d<float>(Form("hGrayBCIDVMM0_Ch%d", c.strips[strip])) -> Fill(c.gray_code_bcid[strip]);
         }
 
         //if(c.pos() >= 0. && c.pos() <= 25.)
