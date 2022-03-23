@@ -1,0 +1,18 @@
+#  Threshold DAC(int), Test pulse(int), run(string)
+
+# good, Panasonic board
+#100, 400, ../../Rootfiles/results_0781.root
+#100, 500, ../../Rootfiles/results_0782.root
+#100, 600, ../../Rootfiles/results_0783.root
+#100, 700, ../../Rootfiles/results_0784.root
+#100, 800, ../../Rootfiles/results_0785.root
+#100, 900, ../../Rootfiles/results_0786.root
+
+# bad, DIN board
+100, 400, ../../Rootfiles/results_0766.root
+100, 500, ../../Rootfiles/results_0767.root
+100, 600, ../../Rootfiles/results_0768.root
+100, 700, ../../Rootfiles/results_0769.root
+100, 800, ../../Rootfiles/results_0770.root
+100, 900, ../../Rootfiles/results_0771.root
+
