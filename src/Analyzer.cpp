@@ -153,6 +153,8 @@ void Analyzer::FillEvent(std::vector<std::vector<int>> *m_pdo,
     int daqTimeStamp_ns = v_daq_timestamp_ns -> at(0);
 
     int strip_threshold = Config::instance()->get_config().at("strip offline threshold").val<int>();
+    int strip_tdo_min = Config::instance()->get_config().at("strip tdo min").val<int>();
+    int strip_tdo_max = Config::instance()->get_config().at("strip tdo max").val<int>();
 
     // group cluster, first round, no cut
     auto group_cluster = [&](
@@ -178,6 +180,9 @@ void Analyzer::FillEvent(std::vector<std::vector<int>> *m_pdo,
             {
                 // cut strips with adc < strip threshold
                 if(adc[i] < strip_threshold)
+                    continue;
+                // tdo cut
+                if(time[i] < strip_tdo_min || time[i] > strip_tdo_max)
                     continue;
 
                 if(charge_temp.size() > 0)

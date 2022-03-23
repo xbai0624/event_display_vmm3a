@@ -15,7 +15,7 @@
 
 using namespace std;
 
-void dac_calibration(const char* path = "~/calib_run_0645.root")
+void dac_calibration(const char* path = "~/data/calib_run_0710.root")
 {
     TFile *f = new TFile(path);
     TTree *T = (TTree*)f->Get("calib");
@@ -134,8 +134,8 @@ void dac_calibration(const char* path = "~/calib_run_0645.root")
     gr -> GetXaxis() -> SetTitle("pulser DAC [counts]");
     gr -> GetYaxis() -> SetTitle("output xADC [counts]");
 
-    double p2 = (gr -> GetFunction("pol1")) -> GetParameter("p0");
-    double p3 = (gr -> GetFunction("pol1")) -> GetParameter("p1");
+    double p2 = (gr -> GetFunction("pol1")) -> GetParameter("p0"); // intercept
+    double p3 = (gr -> GetFunction("pol1")) -> GetParameter("p1"); // slope
     double p2_err = (gr -> GetFunction("pol1")) -> GetParError(0);
     double p3_err = (gr -> GetFunction("pol1")) -> GetParError(1);
     TLatex text;
@@ -143,10 +143,10 @@ void dac_calibration(const char* path = "~/calib_run_0645.root")
     text.SetTextSize(0.7 * text.GetTextSize());
     stringstream ss;
     ss.str("");
-    ss << "Slope      : "<<std::setprecision(4)<<p2<<" #pm "<<p2_err<<" cts/cts";
+    ss << "Slope      : "<<std::setprecision(4)<<p3<<" #pm "<<p3_err<<" cts/cts";
     text.DrawLatexNDC(0.12, 0.85, ss.str().c_str());
     ss.str("");
-    ss << "Intercept : "<<std::setprecision(4)<<p3<<" #pm "<<p3_err<<" cts";
+    ss << "Intercept : "<<std::setprecision(4)<<p2<<" #pm "<<p2_err<<" cts";
     text.DrawLatexNDC(0.12, 0.80, ss.str().c_str());
     c0 -> SetGridx();
     c0 -> SetGridy();
@@ -168,10 +168,10 @@ void dac_calibration(const char* path = "~/calib_run_0645.root")
     double p1 = (gr1 -> GetFunction("pol1")) -> GetParameter("p1");
     double p1_err = (gr1 -> GetFunction("pol1")) -> GetParError(1);
     ss.str("");
-    ss << "Slope      : "<<std::setprecision(4)<<p0<<" #pm "<<p0_err<<" mV/cts";
+    ss << "Slope      : "<<std::setprecision(4)<<p1<<" #pm "<<p1_err<<" mV/cts";
     text.DrawLatexNDC(0.12, 0.85, ss.str().c_str());
     ss.str("");
-    ss << "Intercept : "<<std::setprecision(4)<<p1<<" #pm "<<p1_err<<" mV";
+    ss << "Intercept : "<<std::setprecision(4)<<p0<<" #pm "<<p0_err<<" mV";
     text.DrawLatexNDC(0.12, 0.80, ss.str().c_str());
     c1 -> SetGridx();
     c1 -> SetGridy();
