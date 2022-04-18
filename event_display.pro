@@ -45,6 +45,7 @@ HEADERS += include/QRootCanvas.h \
            include/ValueType.h \
            include/Config.h \
            include/histos.hpp \
+           include/CalibrationConstants.hpp \
 
 SOURCES += src/main.cpp \
            src/QRootCanvas.cpp \

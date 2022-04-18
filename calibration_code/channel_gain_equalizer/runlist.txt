@@ -8,11 +8,55 @@
 #100, 800, ../../Rootfiles/results_0785.root
 #100, 900, ../../Rootfiles/results_0786.root
 
+# good, panasonic board
+#300, 400, ../../Rootfiles/results_0796.root
+#300, 500, ../../Rootfiles/results_0797.root
+#300, 600, ../../Rootfiles/results_0798.root
+#300, 700, ../../Rootfiles/results_0799.root
+#300, 800, ../../Rootfiles/results_0800.root
+#300, 900, ../../Rootfiles/results_0801.root
+
+# bad, panasonic board, but with Ed's Power supply
+#300, 400, ../../Rootfiles/results_0821.root
+#300, 500, ../../Rootfiles/results_0822.root
+#300, 600, ../../Rootfiles/results_0823.root
+#300, 700, ../../Rootfiles/results_0824.root
+#300, 800, ../../Rootfiles/results_0825.root
+#300, 900, ../../Rootfiles/results_0826.root
+
+# bad, panasonic board, but with Ed's Power supply, and in F110 RM
+#300, 400, ../../Rootfiles/results_0827.root
+#300, 500, ../../Rootfiles/results_0828.root
+#300, 600, ../../Rootfiles/results_0829.root
+#300, 700, ../../Rootfiles/results_0830.root
+#300, 800, ../../Rootfiles/results_0831.root
+#300, 900, ../../Rootfiles/results_0832.root
+
+
+# bad, panasonic board, but with BenchTop Power supply, and in F110 RM
+300, 400, ../../Rootfiles/results_0841.root
+300, 500, ../../Rootfiles/results_0842.root
+300, 600, ../../Rootfiles/results_0843.root
+300, 700, ../../Rootfiles/results_0844.root
+300, 800, ../../Rootfiles/results_0845.root
+300, 900, ../../Rootfiles/results_0846.root
+
+
+
 # bad, DIN board
-100, 400, ../../Rootfiles/results_0766.root
-100, 500, ../../Rootfiles/results_0767.root
-100, 600, ../../Rootfiles/results_0768.root
-100, 700, ../../Rootfiles/results_0769.root
-100, 800, ../../Rootfiles/results_0770.root
-100, 900, ../../Rootfiles/results_0771.root
+#300, 400, ../../Rootfiles/results_0803.root
+#300, 500, ../../Rootfiles/results_0804.root
+#300, 600, ../../Rootfiles/results_0805.root
+#300, 700, ../../Rootfiles/results_0806.root
+#300, 800, ../../Rootfiles/results_0807.root
+#300, 900, ../../Rootfiles/results_0808.root
+
+
+# bad, DIN board
+#100, 400, ../../Rootfiles/results_0766.root
+#100, 500, ../../Rootfiles/results_0767.root
+#100, 600, ../../Rootfiles/results_0768.root
+#100, 700, ../../Rootfiles/results_0769.root
+#100, 800, ../../Rootfiles/results_0770.root
+#100, 900, ../../Rootfiles/results_0771.root
 

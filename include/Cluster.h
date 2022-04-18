@@ -9,17 +9,17 @@ struct Cluster
     Cluster();
     ~Cluster();
 
-    int max_charge();
-    int sum_charge();
+    float max_charge();
+    float sum_charge();
     int size();
     float pos();
-    std::vector<int> strip_timing_difference();
+    std::vector<float> strip_timing_difference();
     float max_timing_difference();
     float average_timing_difference();
 
     std::vector<int> strips; // ch No
-    std::vector<int> charge; // pdo
-    std::vector<int> timing; // tdo
+    std::vector<float> charge; // pdo
+    std::vector<float> timing; // tdo
 
     std::vector<int> bcid;
     std::vector<int> gray_code_bcid; // gray code decoded bcid

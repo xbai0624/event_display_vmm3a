@@ -170,9 +170,9 @@ void Analyzer::FillEvent(std::vector<std::vector<int>> *m_pdo,
         {
             std::vector<Cluster> res;
 
-            std::vector<int> charge_temp;
+            std::vector<float> charge_temp;
             std::vector<int> strip_temp;
-            std::vector<int> time_temp;
+            std::vector<float> time_temp;
             std::vector<int> bcid_temp;
             std::vector<int> gray_bcid_temp;
 
@@ -271,7 +271,7 @@ void Analyzer::FillEvent(std::vector<std::vector<int>> *m_pdo,
 
         histo_manager.histo_1d<float>("h_occupancy_vmm0") -> Fill(c.size());
 
-        vector<int> timing_diff_vec = c.strip_timing_difference();
+        vector<float> timing_diff_vec = c.strip_timing_difference();
         for(auto &i: timing_diff_vec)
             histo_manager.histo_1d<float>("hStripTimingDifference") -> Fill(i);
 
@@ -300,6 +300,10 @@ void Analyzer::FillEvent(std::vector<std::vector<int>> *m_pdo,
         histo_manager.histo_1d<float>("hClusterAdcDistributionPlaneX0") -> Fill(c.sum_charge());
         histo_manager.histo_1d<float>("hClusterPosDistributionPlaneX0") -> Fill(c.pos());
         histo_manager.histo_1d<float>("hClusterSizeDistributionPlaneX0") -> Fill(c.size());
+
+        // clusters after calibration
+        Cluster temp = calib.correct_cluster(c);
+        histo_manager.histo_1d<float>("hClusterChargeDistributionPlaneX0") -> Fill(temp.sum_charge());
     }
 }
 

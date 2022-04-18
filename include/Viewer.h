@@ -46,6 +46,7 @@ private:
     QPushButton *l_path;
     QLineEdit *le_path;
     QPushButton *btn_analyze;
+    QPushButton *btn_save_event;
     QWidget *func_widget;
 
     ComponentsSchematic *componentsView;

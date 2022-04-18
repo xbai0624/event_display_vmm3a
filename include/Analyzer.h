@@ -3,6 +3,7 @@
 
 #include "RootTree.h"
 #include "histos.hpp"
+#include "CalibrationConstants.hpp"
 #include <TH1F.h>
 #include <vector>
 
@@ -42,6 +43,9 @@ class Analyzer : public RootTree
 
         // histo manager
         histos::HistoManager<> histo_manager;
+
+        // calibration constants
+        calibration_constants::Calib<> calib;
 };
 
 #endif

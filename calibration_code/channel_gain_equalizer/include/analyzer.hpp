@@ -56,7 +56,15 @@ template<typename T=int> class Analyzer
                         it != cache.end(); ++it)
                 {
                     pulse_level.push_back(it->first);
-                    if(it->second.find(i) != it->second.end()) {
+                    if(it->second.find(i) != it->second.end())
+                    {
+                        // fit the main peak
+                        //int binmax = (it->second.at(i)) -> GetMaximumBin();
+                        //double x = (it->second.at(i)) -> GetXaxis() -> GetBinCenter(binmax);
+                        //(it->second.at(i)) -> Fit("gaus", "Q", "",  x-100, x+100);
+                        //adc_level.push_back(it->second.at(i)->GetFunction("gaus") -> GetParameter("Mean"));
+                        //adc_error.push_back(it->second.at(i)->GetFunction("gaus") -> GetParameter("Sigma"));
+
                         adc_level.push_back(it->second.at(i)->GetMean());
                         adc_error.push_back(it->second.at(i)->GetRMS());
                     }
@@ -87,7 +95,7 @@ template<typename T=int> class Analyzer
             TH1F *h_offset = new TH1F("h_offset", "channel offset", 64, 0, 64);
             TCanvas *c[64];
             // save results
-            TFile *fff = new TFile("result_graphs.root", "recreate");
+            TFile *fff = new TFile("result_canvas.root", "recreate");
             for(auto &i: fittings) {
                 c[i.first] = new TCanvas(Form("c%d", i.first), Form("c%d", i.first), 1000, 600);
                 gPad -> SetFrameLineWidth(2);
@@ -112,8 +120,19 @@ template<typename T=int> class Analyzer
  
                 c[i.first] -> Write(Form("ch%d", i.first));
                 c[i.first] -> Clear();
+
+                std::pair<float, float> gain_offset(0, 0);
+                gain_offset.first = (i.second->GetFunction("pol1"))->GetParameter("p1");
+                gain_offset.second = (i.second->GetFunction("pol1"))->GetParameter("p0");
+                channel_gain_offset[(int)i.first] = gain_offset;
             }
             fff->Close();
+
+            TFile *f1 = new TFile("result_tgraph.root", "recreate");
+            for(auto &i: fittings) {
+                i.second -> Write(Form("g_ch_%d", i.first));
+            }
+            f1->Close();
 
             TFile *f2 = new TFile("result_histos.root", "recreate");
             h_gain -> GetXaxis() -> SetTitle("VMM channel Index");
@@ -123,10 +142,22 @@ template<typename T=int> class Analyzer
             h_offset -> GetYaxis() -> SetTitle("VMM channel Offset [ADC Counts]");
             h_offset -> Write();
             f2 -> Close();
+
+            // save gain and offset
+            std::fstream txt_gain_offset("channel_gain_offset.txt", std::fstream::out);
+            for(auto &i: channel_gain_offset)
+                txt_gain_offset<<std::setfill(' ')<<std::setw(16)<<i.first
+                    <<std::setfill(' ')<<std::setw(16)<<i.second.first
+                    <<std::setfill(' ')<<std::setw(16)<<i.second.second<<std::endl;
+            txt_gain_offset.close();
         }
 
     private:
         ListParser<> list_parser;
+
+        // gain and offset calibration constants
+        // <channel, <gain, offset>>
+        map<int, std::pair<float, float>> channel_gain_offset;
 };
 
 #endif

@@ -159,7 +159,8 @@ DIST          = /usr/lib64/qt5/mkspecs/features/spec_pre.prf \
 		include/Cluster.h \
 		include/ValueType.h \
 		include/Config.h \
-		include/histos.hpp src/main.cpp \
+		include/histos.hpp \
+		include/CalibrationConstants.hpp src/main.cpp \
 		src/QRootCanvas.cpp \
 		src/QMainCanvas.cpp \
 		src/Viewer.cpp \
@@ -350,7 +351,7 @@ distdir: FORCE
 	@test -d $(DISTDIR) || mkdir -p $(DISTDIR)
 	$(COPY_FILE) --parents $(DIST) $(DISTDIR)/
 	$(COPY_FILE) --parents /usr/lib64/qt5/mkspecs/features/data/dummy.cpp $(DISTDIR)/
-	$(COPY_FILE) --parents include/QRootCanvas.h include/QMainCanvas.h include/Viewer.h include/ComponentsSchematic.h include/RootTree.h include/Analyzer.h include/Cluster.h include/ValueType.h include/Config.h include/histos.hpp $(DISTDIR)/
+	$(COPY_FILE) --parents include/QRootCanvas.h include/QMainCanvas.h include/Viewer.h include/ComponentsSchematic.h include/RootTree.h include/Analyzer.h include/Cluster.h include/ValueType.h include/Config.h include/histos.hpp include/CalibrationConstants.hpp $(DISTDIR)/
 	$(COPY_FILE) --parents src/main.cpp src/QRootCanvas.cpp src/QMainCanvas.cpp src/Viewer.cpp src/ComponentsSchematic.cpp src/RootTree.cpp src/Analyzer.cpp src/Cluster.cpp src/ValueType.cpp src/Config.cpp $(DISTDIR)/
 
 

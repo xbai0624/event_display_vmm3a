@@ -21,12 +21,12 @@ int Cluster::size()
     return (int) strips.size();
 }
 
-int Cluster::max_charge()
+float Cluster::max_charge()
 {
     if(strips.size() <= 0)
         return -9999;
 
-    int c = charge[0];
+    float c = charge[0];
     for(size_t i=0; i<charge.size(); ++i)
     {
         if(c < charge[i])
@@ -36,9 +36,9 @@ int Cluster::max_charge()
     return c;
 }
 
-int Cluster::sum_charge()
+float Cluster::sum_charge()
 {
-    int s = 0;
+    float s = 0;
     for(auto &i: charge)
         s += i;
     return s;
@@ -63,15 +63,15 @@ float Cluster::pos()
     return tmp;
 }
 
-std::vector<int> Cluster::strip_timing_difference()
+std::vector<float> Cluster::strip_timing_difference()
 {
-    std::vector<int> res;
+    std::vector<float> res;
 
     if(strips.size() <= 0)
         return res;
 
     size_t max_charge_index = 0;
-    int max_charge = charge[0];
+    float max_charge = charge[0];
     for(size_t i=1; i<charge.size(); ++i)
     {
         if(charge[i] <= max_charge)
@@ -87,7 +87,7 @@ std::vector<int> Cluster::strip_timing_difference()
         if(i == max_charge_index)
             continue;
 
-        int diff = timing[max_charge_index] - timing[i];
+        float diff = timing[max_charge_index] - timing[i];
 
         res.push_back(diff);
     }
@@ -97,7 +97,7 @@ std::vector<int> Cluster::strip_timing_difference()
 
 float Cluster::max_timing_difference()
 {
-    std::vector<int> timing_vec = strip_timing_difference();
+    std::vector<float> timing_vec = strip_timing_difference();
 
     float res = 0;
     if(timing_vec.size() <= 0)
@@ -113,7 +113,7 @@ float Cluster::max_timing_difference()
 
 float Cluster::average_timing_difference()
 {
-    std::vector<int> timing_vec = strip_timing_difference();
+    std::vector<float> timing_vec = strip_timing_difference();
 
     float avg = 0;
     if(timing_vec.size() <= 0)
