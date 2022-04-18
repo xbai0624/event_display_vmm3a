@@ -17,6 +17,7 @@
 #include <QString>
 #include <QLabel>
 #include <QSpinBox>
+#include <QCheckBox>
 
 class TH1F;
 
@@ -29,7 +30,9 @@ public:
     ~Viewer() {}
 
     void InitGui();
-    void InitComponentsSchematic();
+    void InitComponentsSchematic(QWidget *parent = nullptr);
+    void InitLeftCtrlPanel();
+    void SaveCurrentEvent(const std::vector<TH1F*> &event);
 
 public slots:
     void DrawEvent(int);
@@ -53,6 +56,10 @@ private:
     QMainCanvas *fCanvas1;
 
     QGridLayout *layout;
+
+    // left control panel
+    QWidget *left_ctrl_panel;
+    QCheckBox *save_to_disk;
 
     // data cache
     std::vector<std::vector<TH1F*>> data_cache;

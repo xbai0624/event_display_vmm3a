@@ -23,7 +23,7 @@ void Viewer::InitGui()
     layout = new QGridLayout(this);
 
     // detector components layout
-    InitComponentsSchematic();
+    InitLeftCtrlPanel();
 
     // histogram canvases
     fCanvas1 = new QMainCanvas(this);
@@ -50,7 +50,7 @@ void Viewer::InitGui()
     layout->addWidget(spin_box, 1, 1);
     layout->addWidget(l_evt_index, 1, 0);
     layout->addWidget(fCanvas1, 2, 1);
-    layout->addWidget(componentsView, 2, 0);
+    layout->addWidget(left_ctrl_panel, 2, 0);
 
     connect(l_path, SIGNAL(clicked()), this, SLOT(OpenFileDialog()));
     connect(btn_analyze, SIGNAL(clicked()), this, SLOT(Analyze()));
@@ -60,11 +60,26 @@ void Viewer::InitGui()
     connect(fCanvas1, SIGNAL(ItemDeSelected()), componentsView, SLOT(ItemDeSelected()));
 }
 
-void Viewer::InitComponentsSchematic()
+void Viewer::InitComponentsSchematic(QWidget *parent)
 {
-    componentsView = new ComponentsSchematic(this);
+    componentsView = new ComponentsSchematic(parent);
     componentsView->resize(800, 400);
     componentsView -> setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Ignored));
+}
+
+void Viewer::InitLeftCtrlPanel()
+{
+    left_ctrl_panel = new QWidget(this);
+    QVBoxLayout *layout = new QVBoxLayout(left_ctrl_panel);
+
+    // logo
+    InitComponentsSchematic(left_ctrl_panel);
+
+    // check box for writing plots to disk
+    save_to_disk = new QCheckBox("Save Plots", left_ctrl_panel);
+
+    layout -> addWidget(save_to_disk);
+    layout -> addWidget(componentsView);
 }
 
 void Viewer::DrawEvent(int event_to_draw)
@@ -89,6 +104,7 @@ void Viewer::DrawNextEvent()
 
     std::vector<TH1F*> event;
     ana -> GetEvent(event);
+    SaveCurrentEvent(event);
 
     data_cache.push_back(event);
 
@@ -103,6 +119,24 @@ void Viewer::DrawPrevEvent()
         return;
 
     fCanvas1 -> DrawCanvas(data_cache[event_count-1]);
+}
+
+void Viewer::SaveCurrentEvent(const std::vector<TH1F*> &event)
+{
+    if(!save_to_disk->isChecked())
+        return;
+
+    // parse file name
+    std::string path = (le_path -> text()).toStdString();
+    size_t pos1 = path.find_last_of("/");
+    size_t pos2 = path.find_last_of(".");
+    path = path.substr(pos1+1, pos2 - pos1 - 1);
+    path = "cache_plots/" + path + "_event_" + std::to_string(event_count) + ".root";
+
+    TFile *f = new TFile(path.c_str(), "recreate");
+    for(auto &i: event)
+        i -> Write();
+    f->Close();
 }
 
 void Viewer::InitAnalysis(const QString &)
