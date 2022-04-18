@@ -76,7 +76,7 @@ void Viewer::InitLeftCtrlPanel()
     InitComponentsSchematic(left_ctrl_panel);
 
     // check box for writing plots to disk
-    save_to_disk = new QCheckBox("Save Plots", left_ctrl_panel);
+    save_to_disk = new QCheckBox("Save Event", left_ctrl_panel);
 
     layout -> addWidget(save_to_disk);
     layout -> addWidget(componentsView);

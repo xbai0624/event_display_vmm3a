@@ -22,6 +22,7 @@
 
 #include <TH1F.h>
 #include <TH2F.h>
+#include <TCanvas.h>
 #include <TObject.h>
 #include <TFile.h>
 
@@ -327,6 +328,7 @@ namespace histos
                 f->Close();
             }
 
+            // build 1d histogram
             TH1F* __build_th1f(const vector<string> &entry)
             {
                 int nbins = 100;
@@ -342,9 +344,11 @@ namespace histos
                 TH1F *h = new TH1F(entry[2].c_str(), entry[3].c_str(), nbins, low, high);
                 h -> GetXaxis() -> SetTitle(entry[7].c_str());
                 h -> GetYaxis() -> SetTitle(entry[8].c_str());
+                __format_histo(h);
                 return h;
             }
 
+            // build 2d histogram
             TH2F* __build_th2f(const vector<string> &entry)
             {
                 int xbins=100, ybins=100;
@@ -360,7 +364,78 @@ namespace histos
                 TH2F *h = new TH2F(entry[2].c_str(), entry[3].c_str(), xbins, xlow, xhigh, ybins, ylow, yhigh);
                 h -> GetXaxis() -> SetTitle(entry[10].c_str());
                 h -> GetYaxis() -> SetTitle(entry[11].c_str());
+                __format_histo(h);
                 return h;
+            }
+
+            // format tcanvas
+            void __format_canvas(TCanvas *c)
+            {
+                c->SetTitle(""); // no title
+                //c->SetGridx();
+                //c->SetGridy();
+                c->SetBottomMargin(0.12);
+                c->SetLeftMargin(0.12);
+                c->SetRightMargin(0.05);
+                c->SetTopMargin(0.05);
+
+                gPad->SetLeftMargin(0.15); // gPad exists after creating TCanvas
+                gPad->SetBottomMargin(0.15); // gPad exists after creating TCanvas
+                gPad->SetFrameLineWidth(2);
+            }
+
+            // format TGraph, TGraphErrors
+            template<typename Graph> void __format_graph(Graph* g)
+            {
+                g->SetTitle(""); // no title                                                     
+                g->SetMarkerStyle(20);                                                           
+                g->SetMarkerSize(1.0);                                                           
+                g->SetMarkerColor(1);                                                            
+
+                g->SetLineWidth(2); // xb                                                        
+                g->SetLineColor(4); // xb                                                        
+
+                double label_size = 0.045;                                                       
+                double title_size = 0.055;
+                //g->GetXaxis()->SetTitle(x_title.c_str());                                        
+                g->GetXaxis()->SetLabelSize(label_size);                                         
+                g->GetXaxis()->SetTitleSize(title_size);                                         
+                g->GetXaxis()->SetLabelFont(62);                                                 
+                g->GetXaxis()->SetTitleFont(62);
+                g->GetXaxis()->SetTitleOffset(1.0);                                              
+                g->GetXaxis()->CenterTitle();                                                    
+
+                //g->GetYaxis()->SetTitle(y_title.c_str());                                        
+                g->GetYaxis()->SetLabelSize(label_size);                                         
+                g->GetYaxis()->SetTitleSize(title_size);                                         
+                g->GetYaxis()->SetLabelFont(62);                                                 
+                g->GetYaxis()->SetTitleFont(62);
+                g->GetYaxis()->SetTitleOffset(1.1);                                              
+                g->GetYaxis()->SetNdivisions(505);                                               
+                g->GetYaxis()->CenterTitle();   
+            }
+
+            // format TH1F*, TH2F*
+            template<typename Histo> void __format_histo(Histo* g)
+            {
+                double label_size = 0.045;                                                       
+                double title_size = 0.055;
+                //g->GetXaxis()->SetTitle(x_title.c_str());                                        
+                g->GetXaxis()->SetLabelSize(label_size);                                         
+                g->GetXaxis()->SetTitleSize(title_size);                                         
+                g->GetXaxis()->SetLabelFont(62);                                                 
+                g->GetXaxis()->SetTitleFont(62);
+                g->GetXaxis()->SetTitleOffset(1.0);                                              
+                g->GetXaxis()->CenterTitle();                                                    
+
+                //g->GetYaxis()->SetTitle(y_title.c_str());                                        
+                g->GetYaxis()->SetLabelSize(label_size);                                         
+                g->GetYaxis()->SetTitleSize(title_size);                                         
+                g->GetYaxis()->SetLabelFont(62);                                                 
+                g->GetYaxis()->SetTitleFont(62);
+                g->GetYaxis()->SetTitleOffset(1.1);                                              
+                g->GetYaxis()->SetNdivisions(505);                                               
+                g->GetYaxis()->CenterTitle();   
             }
 
         private:
