@@ -1,6 +1,7 @@
 #include "Analyzer.h"
 #include "Cluster.h"
 #include "Config.h"
+#include "ClusteringAlgorithm.h"
 
 #include <iostream>
 #include <iomanip>
@@ -16,11 +17,13 @@ using std::left;
 Analyzer::Analyzer(const char* path) : RootTree(path) 
 {
     histo_manager.init();
+    vmm_decoder_solid = new solid_prototype::VmmDecoderSolid();
 }
 
 Analyzer::Analyzer()
 {
     histo_manager.init();
+    vmm_decoder_solid = new solid_prototype::VmmDecoderSolid();
 }
 
 Analyzer::~Analyzer()
@@ -29,6 +32,19 @@ Analyzer::~Analyzer()
 
 void Analyzer::SetFile(const char* path)
 {
+    online_event_id = 0;
+    histo_manager.reset();
+
+    // for SoLID VMM prototype board analysis
+    if(is_solid_type)
+    {
+        vmm_decoder_solid -> SetRawFile(path);
+        vmm_decoder_solid -> Decode();
+        _path = path;
+        return;
+    }
+
+    // for GP VMM board type analysis
     _path = path;
 
     if(_f != nullptr)
@@ -36,13 +52,107 @@ void Analyzer::SetFile(const char* path)
             _f -> Close();
 
     Init();
-
-    // reset online event id counter
-    online_event_id = 0;
 }
 
 // for online monitoring
 void Analyzer::GetEvent(std::vector<TH1F*> &online_hits)
+{
+    if(is_solid_type)
+        GetSolidVmmEvent(online_hits);
+    else
+        GetGPVmmEvent(online_hits);
+}
+
+// for online monitoring
+void Analyzer::GetEvent2D(std::vector<TH2F*> &online_hits)
+{
+    if(is_solid_type){
+        GetSolidVmmEvent2D(online_hits);
+        return;
+    }
+
+    std::cout<<"ERROR: only solid prototype board has 2D histograms implemented."<<std::endl;
+}
+
+// for online monitoring - Solid VMM board, online_event_id will be incremented in Viewer class
+void Analyzer::GetSolidVmmEvent(std::vector<TH1F*> &online_hits)
+{
+    int i = 0; // VMM chip index
+    TH1F *h = new TH1F(Form("h_evt_%d_chip_%d", online_event_id, i),
+            Form("h_evt_%d_chip_%d", online_event_id, i),
+            140, -5, 135);
+    h -> GetXaxis() -> SetTitle("VMM channel index");
+    h -> GetYaxis() -> SetTitle("peak [adc counts]");
+
+    TH1F *h_timing = new TH1F(Form("h_timing_evt_%d_chip_%d", online_event_id, i),
+            Form("h_timing_evt_%d_chip_%d", online_event_id, i),
+            140, -5, 135);
+    h_timing -> GetXaxis() -> SetTitle("VMM channel index");
+    h_timing -> GetYaxis() -> SetTitle("peak timing [adcc counts]");
+
+    solid_prototype::data_struct event_data = vmm_decoder_solid -> GetEvent(online_event_id);
+
+    if(event_data.num_hits > 0)
+    {
+        for(unsigned int i=0; i<event_data.num_hits; i++)
+        {
+            h -> SetBinContent(event_data.hit_strip[i], event_data.hit_adc[i]);
+            h_timing -> SetBinContent(event_data.hit_strip[i], event_data.hit_time[i]);
+        }
+    }
+
+    online_hits.push_back(h);
+    online_hits.push_back(h_timing);
+}
+
+// for online monitoring - Solid VMM board, online_event_id will be incremented in Viewer class
+void Analyzer::GetSolidVmmEvent2D(std::vector<TH2F*> &online_hits)
+{
+    solid_prototype::data_struct event_data = vmm_decoder_solid -> GetEvent(online_event_id);
+
+    // get time range
+    int time_low = -99999, time_high = 0;
+    if(event_data.num_hits > 0)
+    {
+        for(unsigned int i=0; i<event_data.num_hits; i++)
+        {
+            int hit_time = event_data.hit_time[i];
+            if(time_low <= -90000.0) time_low = hit_time;
+            if(time_low > hit_time) time_low = hit_time;
+            if(time_high < hit_time) time_high = hit_time;
+        }
+    }
+    time_high += 10;
+    time_low -= 10; if(time_low < 0) time_low = 0;
+    int time_nbins = (int)(time_high - 0);
+
+    int i = 0; // VMM chip index
+    TH2F *h = new TH2F(Form("h_evt_%d_chip_%d", online_event_id, i),
+            Form("h_evt_%d_chip_%d", online_event_id, i),
+            140, -5, 135, time_nbins, 0, time_high);
+    h -> GetXaxis() -> SetTitle("VMM channel index");
+    h -> GetXaxis() -> SetTitleOffset(1.5);
+    h -> GetXaxis() -> CenterTitle();
+    h -> GetYaxis() -> SetTitle("hit time [adc counts]");
+    h -> GetYaxis() -> SetTitleOffset(1.5);
+    h -> GetYaxis() -> SetRangeUser(time_low, time_high);
+    h -> GetYaxis() -> CenterTitle();
+    h -> GetZaxis() -> SetTitle("peak [adc counts]");
+    h -> GetZaxis() -> SetTitleOffset(1.0);
+ 
+    if(event_data.num_hits > 0)
+    {
+        for(unsigned int i=0; i<event_data.num_hits; i++)
+        {
+            h -> SetBinContent(event_data.hit_strip[i]+5, event_data.hit_time[i], event_data.hit_adc[i]);
+        }
+    }
+
+    online_hits.push_back(h);
+}
+
+// for online monitoring - GP VMM board, online_event_id will be incremented in Viewer class
+void Analyzer::GetGPVmmEvent(std::vector<TH1F*> &online_hits)
 {
     T_vmm -> GetEntry(online_event_id);
 
@@ -72,8 +182,6 @@ void Analyzer::GetEvent(std::vector<TH1F*> &online_hits)
         online_hits.push_back(h);
         online_hits.push_back(h_timing);
     }
-
-    online_event_id++;
 }
 
 // for analysis, hit/cluster process etc
@@ -89,7 +197,6 @@ void Analyzer::Analyze()
     {
         //T_run -> GetEntry(entry);
     }
-
 
     // reset all histos
     histo_manager.reset();
@@ -123,6 +230,50 @@ void Analyzer::Analyze()
     cout<<"Time elapsed: "<<elapsed_time.count() <<" seconds."<<endl;
 }
 
+void Analyzer::AnalyzeSolidType()
+{
+    // reset all histos
+    histo_manager.reset();
+
+    auto & all_events = vmm_decoder_solid -> GetAllDecodedEvents();
+
+    std::vector<Cluster> clusters;
+    for(auto &i: all_events)
+    {
+        // xb debug, for now discard events with all strips fired
+        //if(i.num_hits > 20) continue;
+
+        int index = 0;
+        for(auto &adc: i.hit_adc)
+        {
+            //if( i.hit_time[index] >= 40 && i.hit_time[index] <= 50)
+                histo_manager.histo_1d<float>("h_6bit_strip_adc") -> Fill(adc);
+
+            index++;
+        }
+
+        for(auto &strip_index: i.hit_strip)
+            histo_manager.histo_1d<float>("h_6bit_strip_index") -> Fill(strip_index);
+
+        // clustering
+        ClusteringAlgorithm::Instance() -> group_cluster(clusters,  i);
+
+        for(auto &c: clusters)
+        {
+            //if(c.size() >= 2 && c.size() <= 10)
+            {
+                histo_manager.histo_1d<float>("h_6bit_cluster_adc") -> Fill(c.sum_charge());
+                histo_manager.histo_1d<float>("h_6bit_cluster_pos") -> Fill(c.pos());
+                histo_manager.histo_1d<float>("h_6bit_cluster_size") -> Fill(c.size());
+
+                auto timing_diff = c.strip_timing_difference();
+                for(auto &i: timing_diff)
+                    histo_manager.histo_1d<float>("h_6bit_strip_timing_reso") -> Fill(i);
+            }
+        }
+    }
+}
+
 // save results
 void Analyzer::Save()
 {
@@ -152,97 +303,9 @@ void Analyzer::FillEvent(std::vector<std::vector<int>> *m_pdo,
     int daqTimeStamp_s = v_daq_timestamp_s -> at(0);
     int daqTimeStamp_ns = v_daq_timestamp_ns -> at(0);
 
-    int strip_threshold = Config::instance()->get_config().at("strip offline threshold").val<int>();
-    int strip_tdo_min = Config::instance()->get_config().at("strip tdo min").val<int>();
-    int strip_tdo_max = Config::instance()->get_config().at("strip tdo max").val<int>();
-
-    // group cluster, first round, no cut
-    auto group_cluster = [&](
-            const std::vector<int> &ch,   // ch no 
-            const std::vector<int> &adc,  // pdo
-            const std::vector<int> &time, // tdo
-            const std::vector<int> &bcid, // bcid
-            const std::vector<int> &gray_bcid, // gray code decoded bcid
-            const int &daq_time_s, // daq time s
-            const int &daq_time_ns // daqtime ns
-            )
-        -> std::vector<Cluster>
-        {
-            std::vector<Cluster> res;
-
-            std::vector<float> charge_temp;
-            std::vector<int> strip_temp;
-            std::vector<float> time_temp;
-            std::vector<int> bcid_temp;
-            std::vector<int> gray_bcid_temp;
-
-            for(size_t i=0; i<ch.size(); ++i)
-            {
-                // cut strips with adc < strip threshold
-                if(adc[i] < strip_threshold)
-                    continue;
-                // tdo cut
-                if(time[i] < strip_tdo_min || time[i] > strip_tdo_max)
-                    continue;
-
-                if(charge_temp.size() > 0)
-                {
-                    if( (ch[i] - strip_temp.back()) == 1) {
-                        strip_temp.push_back(ch[i]);
-                        charge_temp.push_back(adc[i]);
-                        time_temp.push_back(time[i]);
-                        bcid_temp.push_back(bcid[i]);
-                        gray_bcid_temp.push_back(gray_bcid[i]);
-                    }
-                    else {
-                        Cluster c;
-                        c.strips = strip_temp;
-                        c.charge = charge_temp;
-                        c.timing = time_temp;
-                        c.bcid = bcid_temp;
-                        c.gray_code_bcid = gray_bcid_temp;
-                        c.daq_time_s = daq_time_s;
-                        c.daq_time_ns = daq_time_ns;
-                        res.push_back(c);
-
-                        charge_temp.clear();
-                        strip_temp.clear();
-                        time_temp.clear();
-                        bcid_temp.clear();
-                        gray_bcid_temp.clear();
-
-                        strip_temp.push_back(ch[i]);
-                        charge_temp.push_back(adc[i]);
-                        time_temp.push_back(time[i]);
-                        bcid_temp.push_back(bcid[i]);
-                        gray_bcid_temp.push_back(gray_bcid[i]);
-                    }
-                }
-                else {
-                    strip_temp.push_back(ch[i]);
-                    charge_temp.push_back(adc[i]);
-                    time_temp.push_back(time[i]);
-                    bcid_temp.push_back(bcid[i]);
-                    gray_bcid_temp.push_back(gray_bcid[i]);
-                }
-            }
-
-            if(charge_temp.size() > 0) {
-                Cluster c;
-                c.strips = strip_temp;
-                c.charge = charge_temp;
-                c.timing = time_temp;
-                c.bcid = bcid_temp;
-                c.gray_code_bcid = gray_bcid_temp;
-                c.daq_time_s = daq_time_s;
-                c.daq_time_ns = daq_time_ns;
-                res.push_back(c);
-            }
-            return res;
-        };
-
     // do clustering
-    auto clusters = group_cluster(vmm_ch, vmm_pdo, vmm_tdo, vmm_bcid, vmm_gray_bcid, daqTimeStamp_s, daqTimeStamp_ns);
+    std::vector<Cluster> clusters;
+    ClusteringAlgorithm::Instance() -> group_cluster(clusters, vmm_ch, vmm_pdo, vmm_tdo, vmm_bcid, vmm_gray_bcid, daqTimeStamp_s, daqTimeStamp_ns);
 
     // cluster size cut
     int cluster_min = Config::instance()->get_config().at("min cluster size").val<int>();
@@ -309,6 +372,16 @@ void Analyzer::FillEvent(std::vector<std::vector<int>> *m_pdo,
 
 std::string Analyzer::__parse_output_file_name()
 {
+    if(is_solid_type) {
+        return __parse_solidvmm_output_file_name();
+    }
+    else {
+        return __parse_gpvmm_output_file_name();
+    }
+}
+
+std::string Analyzer::__parse_gpvmm_output_file_name()
+{
     std::string res = "Rootfiles/results.root";
     if(_path.size() < 10)
         return res;
@@ -329,5 +402,25 @@ std::string Analyzer::__parse_output_file_name()
     }
 
     res = "Rootfiles/results_" + tmp1;
+    return res;
+}
+
+std::string Analyzer::__parse_solidvmm_output_file_name()
+{
+    std::string res = "Rootfiles/results.root";
+    if(_path.size() < 3)
+        return res;
+
+    // input file format: /some/path/xxxx.bin
+    if(_path.find(".bin") == std::string::npos){
+        return res;
+    }
+
+    size_t p = _path.find_last_of("/");
+    size_t e = _path.find_last_of(".");
+    string tmp1 = _path.substr(p+1, e);
+    std::cout<<tmp1<<std::endl;
+
+    res = "Rootfiles/" + tmp1 + ".root";
     return res;
 }

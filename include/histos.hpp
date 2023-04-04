@@ -328,6 +328,11 @@ namespace histos
                 f->Close();
             }
 
+            const map<string, TH1*> &get_histos_1d() const
+            {
+                return __histos;
+            }
+
             // build 1d histogram
             TH1F* __build_th1f(const vector<string> &entry)
             {
@@ -436,6 +441,8 @@ namespace histos
                 g->GetYaxis()->SetTitleOffset(1.1);                                              
                 g->GetYaxis()->SetNdivisions(505);                                               
                 g->GetYaxis()->CenterTitle();   
+
+                g->SetLineWidth(2);
             }
 
         private:

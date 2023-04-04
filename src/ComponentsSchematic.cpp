@@ -30,10 +30,18 @@ void ComponentsSchematic::Init()
     graphics_scene -> addItem(item1);
 
     // add a log
+    // logo jlab2 - vertical
     //QPixmap logo("./resources/jlab2.jpg");
     //logo = logo.scaled(37.5*2, 172.5*2);
-    QPixmap logo("./resources/logo.jpeg");
-    logo = logo.scaled(37.5*2, 37.5*2);
+
+    // logo jlab1 - horizontal
+    QPixmap logo("./resources/jlab1.jpg");
+    logo = logo.scaled(120.*0.8, 37.5*0.8);
+
+    // logo uva
+    //QPixmap logo("./resources/logo.jpeg");
+    //logo = logo.scaled(37.5*2, 37.5*2);
+
     graphics_scene -> addPixmap(logo);
 
     QVBoxLayout *layout = new QVBoxLayout(this);

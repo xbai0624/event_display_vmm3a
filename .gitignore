@@ -1,8 +1,12 @@
 main
+display
+viewer
 moc/
 obj/
+daq/
 plots/
 Rootfiles/
 dict/
+backup/
 cache_plots/*.root
 *.pdf

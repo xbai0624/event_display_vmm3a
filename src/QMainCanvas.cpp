@@ -2,6 +2,7 @@
 
 #include <TCanvas.h>
 #include <TH1F.h>
+#include <TH2F.h>
 #include <TSystem.h>
 #include <TStyle.h>
 
@@ -26,6 +27,8 @@ QMainCanvas::QMainCanvas(QWidget* parent) : QWidget(parent)
     fRootTimer = new QTimer(this);
     QObject::connect(fRootTimer, SIGNAL(timeout()), this, SLOT(handle_root_events()));
     fRootTimer->start(20);
+
+    draw_option = "colz";
 }
 
 void QMainCanvas::DrawCanvas()
@@ -75,6 +78,30 @@ void QMainCanvas::DrawCanvas(const std::vector<TH1F*> &h)
     for(int i=0; i<s; i++) {
         c->cd(i+1);
         h[i] -> Draw();
+    }
+
+    c -> Modified();
+    c -> Update();
+
+    Refresh();
+}
+
+void QMainCanvas::DrawCanvas2D(const std::vector<TH2F*> &h)
+{
+    int s = h.size();
+    if(s <= 0)
+        return;
+
+    static TCanvas *c = fCanvas -> GetCanvas();
+    c -> Clear();
+    c -> Divide(s, 1);
+
+    for(int i=0; i<s; i++) {
+        c->cd(i+1);
+        gPad->SetLeftMargin(0.1);
+        gPad->SetRightMargin(0.1);
+        //h[i] -> Draw("LEGO2Z");
+        h[i] -> Draw(draw_option.c_str());
     }
 
     c -> Modified();

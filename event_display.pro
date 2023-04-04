@@ -3,7 +3,7 @@
 ######################################################################
 
 TEMPLATE = app
-TARGET = main
+TARGET = viewer
 
 CONFIG += Qt DEBUG c++11
 QT += core gui widgets
@@ -46,6 +46,10 @@ HEADERS += include/QRootCanvas.h \
            include/Config.h \
            include/histos.hpp \
            include/CalibrationConstants.hpp \
+           include/VmmDecoderSolidProtoType.h \
+           include/ViewerSettingWindow.h \
+           include/AnalysisResultWindow.h \
+           include/ClusteringAlgorithm.h \
 
 SOURCES += src/main.cpp \
            src/QRootCanvas.cpp \
@@ -57,3 +61,7 @@ SOURCES += src/main.cpp \
            src/Cluster.cpp \
            src/ValueType.cpp \
            src/Config.cpp \
+           src/VmmDecoderSolidProtoType.cpp \
+           src/ViewerSettingWindow.cpp \
+           src/AnalysisResultWindow.cpp \
+           src/ClusteringAlgorithm.cpp \
