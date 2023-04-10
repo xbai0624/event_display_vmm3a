@@ -18,8 +18,8 @@ Viewer::Viewer(QWidget *parent) : QWidget(parent)
     resize(1200, 600);
     setWindowTitle("VMM Event Display");
 
-    //InitAnalysis("./data/run_0588.root");
-    InitAnalysis("./backup/cosmic_3.bin");
+    InitAnalysis("./data/run_0588.root");
+    //InitAnalysis("./backup/cosmic_3.bin");
 }
 
 void Viewer::InitGui()
@@ -42,8 +42,8 @@ void Viewer::InitGui()
 
     // file path indicator and func widget
     func_widget = new QWidget(this);
-    //le_path = new QLineEdit("./data/run_0588.root", func_widget);
-    le_path = new QLineEdit("./backup/cosmic_3.bin", func_widget);
+    le_path = new QLineEdit("./data/run_0588.root", func_widget);
+    //le_path = new QLineEdit("./backup/cosmic_3.bin", func_widget);
     btn_analyze = new QPushButton("&Analyze", func_widget);
     QHBoxLayout* _lhy = new QHBoxLayout(func_widget);
     _lhy -> addWidget(le_path);
@@ -60,8 +60,8 @@ void Viewer::InitGui()
     connect(btn_analyze, SIGNAL(clicked()), this, SLOT(Analyze()));
     connect(spin_box, SIGNAL(valueChanged(int)), this, SLOT(DrawEvent(int)));
     connect(le_path, SIGNAL(textChanged(const QString &)), this, SLOT(InitAnalysis(const QString &)));
-    connect(fCanvas1, SIGNAL(ItemSelected()), componentsView, SLOT(ItemSelected()));
-    connect(fCanvas1, SIGNAL(ItemDeSelected()), componentsView, SLOT(ItemDeSelected()));
+    //connect(fCanvas1, SIGNAL(ItemSelected()), componentsView, SLOT(ItemSelected()));
+    //connect(fCanvas1, SIGNAL(ItemDeSelected()), componentsView, SLOT(ItemDeSelected()));
 
     connect(this, SIGNAL(analyzeDone()), this, SLOT(PopupAnalysisResult()));
 
@@ -70,9 +70,9 @@ void Viewer::InitGui()
 
 void Viewer::InitComponentsSchematic(QWidget *parent)
 {
-    componentsView = new ComponentsSchematic(parent);
-    componentsView->resize(100, 100);
-    componentsView -> setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Ignored));
+    //componentsView = new ComponentsSchematic(parent);
+    //componentsView->resize(100, 100);
+    //componentsView -> setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Ignored));
 }
 
 void Viewer::InitLeftCtrlPanel()
@@ -87,8 +87,9 @@ void Viewer::InitLeftCtrlPanel()
     save_to_disk = new QCheckBox("Save Event", left_ctrl_panel);
 
     layout -> addWidget(save_to_disk);
-    layout -> addWidget(componentsView);
+    //layout -> addWidget(componentsView);
     layout -> addWidget(GEMChamberTypeGroupBox());
+    layout -> addWidget(VMMBoardTypeGroupBox());
 }
 
 void Viewer::AddMenuBar()
@@ -140,6 +141,25 @@ QGroupBox *Viewer::GEMChamberTypeGroupBox()
     return groupbox;
 }
 
+QGroupBox *Viewer::VMMBoardTypeGroupBox()
+{
+    QGroupBox *groupbox = new QGroupBox("VMM Board Type");
+    QVBoxLayout *layout = new QVBoxLayout(groupbox);
+
+    solid_vmm_board = new QRadioButton("SoLID Type");
+    solid_vmm_board -> setChecked(true);
+    gp_vmm_board = new QRadioButton("GPVMM Type");
+
+    layout -> addWidget(solid_vmm_board);
+    layout -> addWidget(gp_vmm_board);
+
+    connect(solid_vmm_board, SIGNAL(toggled(bool)), this, SLOT(UpdateGEMChamberType(bool)));
+    connect(gp_vmm_board, SIGNAL(toggled(bool)), this, SLOT(UpdateGEMChamberType(bool)));
+
+    return groupbox;
+}
+
+
 void Viewer::UpdateGEMChamberType(bool s)
 {
     if(uva_gem -> isChecked())
@@ -149,6 +169,17 @@ void Viewer::UpdateGEMChamberType(bool s)
 
     ana -> SetGEMChamberType(gem_chamber_type);
 }
+
+void Viewer::UpdateVMMBoardType(bool s)
+{
+    if(solid_vmm_board -> isChecked())
+        is_solid_type = true;
+    if(gp_vmm_board -> isChecked())
+        is_solid_type = false;
+
+    ana -> SetVMMBoardType(is_solid_type);
+}
+
 
 void Viewer::UpdateSetting()
 {

@@ -44,6 +44,7 @@ public:
     void SetSolidType() {is_solid_type = true;}
     void UnsetSolidType() {is_solid_type = false;}
     QGroupBox *GEMChamberTypeGroupBox();
+    QGroupBox *VMMBoardTypeGroupBox();
 
 public slots:
     void DrawEvent(int);
@@ -58,6 +59,7 @@ public slots:
     void Analyze();
     void PopupAnalysisResult();
     void UpdateGEMChamberType(bool);
+    void UpdateVMMBoardType(bool);
 
 signals:
     void analyzeDone();
@@ -93,6 +95,10 @@ private:
     QGroupBox *chamberTypeGroup;
     QRadioButton *msu_gem;
     QRadioButton *uva_gem;
+    // qradiobutton to choose vmm board type
+    QGroupBox *vmmBoardTypeGroup;
+    QRadioButton *solid_vmm_board;
+    QRadioButton *gp_vmm_board;
 
     // data cache
     std::vector<std::vector<TH1F*>> data_cache;
@@ -105,7 +111,7 @@ private:
     int event_count = 0;
 
     // solid prototype board
-    bool is_solid_type = true;
+    bool is_solid_type = false;
 
     // when Analyze() function is done, show the result
     AnalysisResultWindow *result_window;

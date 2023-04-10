@@ -6,6 +6,7 @@
 #include "CalibrationConstants.hpp"
 #include "VmmDecoderSolidProtoType.h"
 #include <TH1F.h>
+#include <TTree.h>
 #include <vector>
 #include <map>
 
@@ -23,9 +24,12 @@ class Analyzer : public RootTree
         std::string __parse_gpvmm_output_file_name();
         std::string __parse_solidvmm_output_file_name();
 
+        void InitTree();
+
         void Save();
         void SetSolidType(){is_solid_type = true;}
         void UnsetSolidType(){is_solid_type = false;}
+        void SetVMMBoardType(bool t){is_solid_type = t;}
         void SetGEMChamberType(int t) {
             vmm_decoder_solid -> SetGEMChamberType(t);
             vmm_decoder_solid -> Decode(); // need to redo decoding after chaning chamber type
@@ -66,12 +70,18 @@ class Analyzer : public RootTree
 
         // histo manager
         histos::HistoManager<> histo_manager;
+        // besides histos, also save results to a tree
+        TTree *T;
+        // tree branches
+        int T_strip;
+        int T_hit_adc;
+        int T_hit_time;
 
         // calibration constants
         calibration_constants::Calib<> calib;
 
         // analysis for solid prototype board
-        bool is_solid_type = true;
+        bool is_solid_type = false;
         solid_prototype::VmmDecoderSolid *vmm_decoder_solid = nullptr;
 };
 

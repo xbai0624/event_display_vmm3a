@@ -17,17 +17,27 @@ using std::left;
 Analyzer::Analyzer(const char* path) : RootTree(path) 
 {
     histo_manager.init();
+    InitTree();
     vmm_decoder_solid = new solid_prototype::VmmDecoderSolid();
 }
 
 Analyzer::Analyzer()
 {
     histo_manager.init();
+    InitTree();
     vmm_decoder_solid = new solid_prototype::VmmDecoderSolid();
 }
 
 Analyzer::~Analyzer()
 {
+}
+
+void Analyzer::InitTree()
+{
+    T = new TTree("T", "VMM analysis result tree");
+    T -> Branch("strip_index", &T_strip, "strip_index/I");
+    T -> Branch("hit_adc", &T_hit_adc, "hit_adc/I");
+    T -> Branch("hit_time", &T_hit_time, "hit_index/I");
 }
 
 void Analyzer::SetFile(const char* path)
@@ -247,7 +257,15 @@ void Analyzer::AnalyzeSolidType()
         for(auto &adc: i.hit_adc)
         {
             //if( i.hit_time[index] >= 40 && i.hit_time[index] <= 50)
-                histo_manager.histo_1d<float>("h_6bit_strip_adc") -> Fill(adc);
+            histo_manager.histo_1d<float>("h_6bit_strip_adc") -> Fill(adc);
+
+            T_strip = (int)i.hit_strip[index];
+            T_hit_adc = (int)adc;
+            T_hit_time = (int)i.hit_time[index];
+            T -> Fill();
+
+            histo_manager.histo_2d<float>("h2DADC_vs_Strip") -> Fill(T_strip, T_hit_adc);
+            histo_manager.histo_2d<float>("h2DTime_vs_Strip") -> Fill(T_strip, T_hit_time);
 
             index++;
         }
@@ -279,8 +297,7 @@ void Analyzer::Save()
 {
     std::string output = __parse_output_file_name();
     std::cout<<"results saved to: "<<output<<std::endl;
-
-    histo_manager.save(output.c_str());
+    histo_manager.save(output.c_str(), T);
 }
 
 void Analyzer::FillEvent(std::vector<std::vector<int>> *m_pdo,

@@ -7,7 +7,7 @@
 #include <TInterpreter.h>
 #include <QStyleFactory>
 
-#define SOLID_PROTOTYPE
+//#define SOLID_PROTOTYPE
 
 int main(int argc, char* argv[])
 {

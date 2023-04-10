@@ -328,6 +328,16 @@ namespace histos
                 f->Close();
             }
 
+            template<typename ROOT_TREE>
+                void save(const char* path, ROOT_TREE* tree)
+                {
+                    TFile *f = new  TFile(path, "recreate");
+                    for(auto &i: __histos)
+                        i.second -> Write();
+                    tree->Write();
+                    f->Close();
+                }
+
             const map<string, TH1*> &get_histos_1d() const
             {
                 return __histos;
