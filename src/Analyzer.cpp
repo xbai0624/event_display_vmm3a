@@ -217,7 +217,7 @@ void Analyzer::Analyze()
     // vmm data
     for(int entry = 0; entry < N; entry++)
     {
-        //cout<<"event id: "<<entry<<endl;
+        cout<<"event id: "<<entry<<endl;
         T_vmm -> GetEntry(entry);
 
         int number_of_vmm_chips = vv_pdo -> size();
@@ -247,6 +247,9 @@ void Analyzer::AnalyzeSolidType()
 
     auto & all_events = vmm_decoder_solid -> GetAllDecodedEvents();
 
+    int time_low = Config::instance() -> get_config().at("strip tdo min").val<int>();
+    int time_high = Config::instance() -> get_config().at("strip tdo max").val<int>();
+
     std::vector<Cluster> clusters;
     for(auto &i: all_events)
     {
@@ -256,7 +259,9 @@ void Analyzer::AnalyzeSolidType()
         int index = 0;
         for(auto &adc: i.hit_adc)
         {
-            //if( i.hit_time[index] >= 40 && i.hit_time[index] <= 50)
+            if(i.hit_time[index] < time_low || i.hit_time[index] > time_high)
+                continue;
+
             histo_manager.histo_1d<float>("h_6bit_strip_adc") -> Fill(adc);
 
             T_strip = (int)i.hit_strip[index];

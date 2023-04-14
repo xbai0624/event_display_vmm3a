@@ -51,6 +51,7 @@ class ClusteringAlgorithm
         int strip_threshold;
         int strip_tdo_min;
         int strip_tdo_max;
+        unsigned int cluster_min_size;
 };
 
 #endif

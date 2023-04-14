@@ -17,6 +17,7 @@ void ClusteringAlgorithm::InitCuts()
     strip_threshold = Config::instance()->get_config().at("strip offline threshold").val<int>();
     strip_tdo_min = Config::instance()->get_config().at("strip tdo min").val<int>();
     strip_tdo_max = Config::instance()->get_config().at("strip tdo max").val<int>();
+    cluster_min_size = (unsigned int)Config::instance()->get_config().at("min cluster size").val<int>();
 }
 
 // clustering for GPVMM board
@@ -197,7 +198,9 @@ void ClusteringAlgorithm::group_cluster(
                 c.strips = strip_temp;
                 c.charge = adc_temp;
                 c.timing = time_temp;
-                res.push_back(c);
+
+                if(adc_temp.size() >= cluster_min_size)
+                    res.push_back(c);
 
                 adc_temp.clear();
                 strip_temp.clear();
@@ -220,7 +223,8 @@ void ClusteringAlgorithm::group_cluster(
         c.strips = strip_temp;
         c.charge = adc_temp;
         c.timing = time_temp;
-        res.push_back(c);
+        if(adc_temp.size() >= cluster_min_size)
+            res.push_back(c);
     }
 
     //std::cout<<"--------------------------------"<<std::endl;

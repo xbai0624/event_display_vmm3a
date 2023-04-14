@@ -329,7 +329,7 @@ void Viewer::InitAnalysis(const QString &)
             ana = new Analyzer();
         ana -> SetFile(path.c_str());
 
-        std::cout<<"Analyzing file: "<<path<<std::endl;
+        std::cout<<"Viewer:: Analyzing file: "<<path<<std::endl;
     }
     else {
         std::cout<<path<<" not exist"<<std::endl;
